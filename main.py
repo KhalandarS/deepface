@@ -150,8 +150,13 @@ while True:
 # Save Excel file at the end
 if attendance_records:
     df = pd.DataFrame(attendance_records)
-    df.to_excel(excel_path, index=False)
-    print(f"\n✅ Attendance saved to {excel_path}")
+    try:
+        df.to_excel(excel_path, index=False)
+        print(f"\n✅ Attendance saved to {excel_path}")
+    except PermissionError:
+        print(f"\n❌ Error: Could not save to {excel_path}. Is the file open?")
+    except Exception as e:
+        print(f"\n❌ Failed to save attendance: {e}")
 else:
     print("\n⚠️ No attendance recorded today.")
 
