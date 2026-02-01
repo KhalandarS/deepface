@@ -73,7 +73,16 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
     return data
 
 def extract_faces(frame: np.ndarray, detections: Any) -> List[tuple[np.ndarray, tuple[int, int, int, int]]]:
-    """Extract face crops and coordinates from MediaPipe detections."""
+    """
+    Extract face crops and coordinates from MediaPipe detections.
+
+    Args:
+        frame: The original image frame.
+        detections: The MediaPipe detection results.
+
+    Returns:
+        List[tuple]: A list of tuples, each containing the face crop and its coordinates (x1, y1, x2, y2).
+    """
     extracted = []
     if not detections:
         return extracted
@@ -101,7 +110,17 @@ def extract_faces(frame: np.ndarray, detections: Any) -> List[tuple[np.ndarray, 
     return extracted
 
 def recognize_face(face_img: np.ndarray, db_path: str, model_name: str) -> tuple[str, str]:
-    """Recognize face against database."""
+    """
+    Recognize a face against the database using DeepFace.
+
+    Args:
+        face_img: The face image crop.
+        db_path: Path to the student database.
+        model_name: The DeepFace model to use.
+
+    Returns:
+        tuple[str, str]: A tuple containing (RollNumber, Name). Returns ("UNK", "Unknown") if not recognized.
+    """
     try:
          matches = DeepFace.find(img_path=face_img, db_path=db_path, model_name=model_name, enforce_detection=False, silent=True)
          if len(matches[0]) > 0:
