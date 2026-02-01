@@ -31,6 +31,16 @@ FACE_TARGET_SIZE = (160, 160)
 
 
 
+def parse_filename(filename: str) -> tuple[str, str]:
+    """Parse filename to extract roll number and name."""
+    try:
+        base = filename.rsplit(".", 1)[0]
+        if "_" in base:
+            return base.split("_", 1)
+        return "UNK", base
+    except Exception:
+        return "UNK", "Unknown"
+
 def load_student_db(db_path: str) -> List[Dict[str, Any]]:
     """Load student images and data from the database directory."""
     data: List[Dict[str, Any]] = []
@@ -42,11 +52,7 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
         if filename.lower().endswith((".jpg", ".jpeg", ".png")):
             try:
                 path = os.path.join(db_path, filename)
-                # specific logic for roll_name format
-                if "_" in filename:
-                    roll, name = filename.rsplit(".", 1)[0].split("_", 1)
-                else:
-                     roll, name = "UNK", filename.rsplit(".", 1)[0]
+                roll, name = parse_filename(filename)
                 
                 img = Image.open(path)
                 img.verify()  # Ensure image isn't corrupted
@@ -104,10 +110,7 @@ while True:
                 if len(matches[0]) > 0:
                     identity_path = matches[0].iloc[0]['identity']
                     identity_filename = os.path.basename(identity_path)
-                    try:
-                        roll, name = identity_filename.rsplit(".", 1)[0].split("_", 1)
-                    except ValueError:
-                        roll, name = "UNK", "Unknown"
+                    roll, name = parse_filename(identity_filename)
 
                     label = f"{roll} - {name}"
 
