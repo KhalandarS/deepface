@@ -1,0 +1,6 @@
+deepface
+opencv-python
+pandas
+mediapipe
+pillow
+numpy
