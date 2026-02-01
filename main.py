@@ -23,18 +23,34 @@ MODEL_SELECTION = 0
 FACE_TARGET_SIZE = (160, 160)
 
 
+
+def load_student_db(db_path):
+    """Load student images and data from the database directory."""
+    data = []
+    if not os.path.exists(db_path):
+        print(f"Warning: Database path '{db_path}' does not exist.")
+        return data
+
+    for filename in os.listdir(db_path):
+        if filename.lower().endswith((".jpg", ".jpeg", ".png")):
+            try:
+                path = os.path.join(db_path, filename)
+                # specific logic for roll_name format
+                if "_" in filename:
+                    roll, name = filename.rsplit(".", 1)[0].split("_", 1)
+                else:
+                     roll, name = "UNK", filename.rsplit(".", 1)[0]
+                
+                img = Image.open(path)
+                img.verify()  # Ensure image isn't corrupted
+                data.append({"roll": roll, "name": name, "path": path})
+            except Exception as e:
+                print(f"Skipping file {filename}: {e}")
+    return data
+
 # Load known student images and data
-student_data = []
-for filename in os.listdir(DATABASE_PATH):
-    if filename.lower().endswith((".jpg", ".jpeg", ".png")):
-        try:
-            path = os.path.join(DATABASE_PATH, filename)
-            roll, name = filename.rsplit(".", 1)[0].split("_", 1)
-            img = Image.open(path)
-            img.verify()  # Ensure image isn't corrupted
-            student_data.append({"roll": roll, "name": name, "path": path})
-        except Exception as e:
-            print(f"Skipping file {filename}: {e}")
+student_data = load_student_db(DATABASE_PATH)
+
 
 # Initialize attendance tracking
 today_str = datetime.now().strftime("%Y-%m-%d")
