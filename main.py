@@ -9,6 +9,7 @@ import argparse
 import logging
 import os
 import sys
+import atexit
 from datetime import datetime
 from typing import List, Dict, Any
 
@@ -141,6 +142,15 @@ today_str = datetime.now().strftime("%Y-%m-%d")
 excel_path = os.path.join(LOGS_DIRECTORY, f"attendance_{today_str}.xlsx")
 attendance_records = []
 
+def cleanup():
+    """Release resources on exit."""
+    if 'cap' in globals() and cap is not None and cap.isOpened():
+        cap.release()
+    cv2.destroyAllWindows()
+    logging.info("Resources released.")
+
+atexit.register(cleanup)
+
 # Set to prevent multiple entries per student
 marked_students = set()
 
@@ -209,8 +219,5 @@ if attendance_records:
         logging.error(f"Failed to save attendance: {e}")
 else:
     logging.warning("No attendance recorded today.")
-
-cap.release()
-cv2.destroyAllWindows()
 
 
