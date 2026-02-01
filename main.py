@@ -155,6 +155,7 @@ while True:
             
             if roll != "UNK":
                 label = f"{roll} - {name}"
+                color = (0, 255, 0)  # Green for known
 
                 # Mark attendance only once per student
                 if roll not in marked_students:
@@ -164,11 +165,12 @@ while True:
                     logging.info(f"Marked: {label} at {timestamp}")
             else:
                 label = "Unknown"
+                color = (0, 0, 255)  # Red for unknown
 
             # Draw label and rectangle
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, label, (x1, y1 - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
     # Display the live feed
     cv2.imshow("Smart Attendance", frame)
