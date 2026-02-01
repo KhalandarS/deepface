@@ -3,6 +3,7 @@ Main script for Face Recognition Attendance System using DeepFace.
 """
 import os
 from datetime import datetime
+from typing import List, Dict, Any
 
 import cv2
 import mediapipe as mp
@@ -24,9 +25,9 @@ FACE_TARGET_SIZE = (160, 160)
 
 
 
-def load_student_db(db_path):
+def load_student_db(db_path: str) -> List[Dict[str, Any]]:
     """Load student images and data from the database directory."""
-    data = []
+    data: List[Dict[str, Any]] = []
     if not os.path.exists(db_path):
         print(f"Warning: Database path '{db_path}' does not exist.")
         return data
