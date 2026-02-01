@@ -1,5 +1,9 @@
 """
 Main script for Face Recognition Attendance System using DeepFace.
+
+Expected Database Structure:
+- Store images in the `students_db` directory (or specify via --db-path).
+- Filenames should follow the format: `RollNumber_Name.jpg` (e.g., `101_JohnDoe.jpg`).
 """
 import argparse
 import os
