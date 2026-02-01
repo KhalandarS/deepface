@@ -12,16 +12,16 @@ from deepface import DeepFace
 from PIL import Image
 
 # Directories and paths
-DB_PATH = "students_db"
-LOG_DIR = "attendance_logs"
-os.makedirs(LOG_DIR, exist_ok=True)
+DATABASE_PATH = "students_db"
+LOGS_DIRECTORY = "attendance_logs"
+os.makedirs(LOGS_DIRECTORY, exist_ok=True)
 
 # Load known student images and data
 student_data = []
-for filename in os.listdir(DB_PATH):
+for filename in os.listdir(DATABASE_PATH):
     if filename.lower().endswith((".jpg", ".jpeg", ".png")):
         try:
-            path = os.path.join(DB_PATH, filename)
+            path = os.path.join(DATABASE_PATH, filename)
             roll, name = filename.rsplit(".", 1)[0].split("_", 1)
             img = Image.open(path)
             img.verify()  # Ensure image isn't corrupted
@@ -31,7 +31,7 @@ for filename in os.listdir(DB_PATH):
 
 # Initialize attendance tracking
 today_str = datetime.now().strftime("%Y-%m-%d")
-excel_path = os.path.join(LOG_DIR, f"attendance_{today_str}.xlsx")
+excel_path = os.path.join(LOGS_DIRECTORY, f"attendance_{today_str}.xlsx")
 attendance_records = []
 
 # Set to prevent multiple entries per student
@@ -69,7 +69,7 @@ while True:
 
             try:
                 # Perform facial recognition using DeepFace
-                matches = DeepFace.find(img_path=face_crop_resized, db_path=DB_PATH, model_name="Facenet", enforce_detection=False, silent=True)
+                matches = DeepFace.find(img_path=face_crop_resized, db_path=DATABASE_PATH, model_name="Facenet", enforce_detection=False, silent=True)
 
                 if len(matches[0]) > 0:
                     identity_path = matches[0].iloc[0]['identity']
