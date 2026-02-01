@@ -94,6 +94,18 @@ def extract_faces(frame: np.ndarray, detections: Any) -> List[tuple[np.ndarray, 
         extracted.append((face_crop, (x1, y1, x2, y2)))
     return extracted
 
+def recognize_face(face_img: np.ndarray, db_path: str, model_name: str) -> tuple[str, str]:
+    """Recognize face against database."""
+    try:
+         matches = DeepFace.find(img_path=face_img, db_path=db_path, model_name=model_name, enforce_detection=False, silent=True)
+         if len(matches[0]) > 0:
+             identity_path = matches[0].iloc[0]['identity']
+             identity_filename = os.path.basename(identity_path)
+             return parse_filename(identity_filename)
+    except Exception as e:
+         print(f"Recognition error: {e}")
+    return "UNK", "Unknown"
+
 # Load known student images and data
 student_data = load_student_db(DATABASE_PATH)
 print(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
@@ -133,28 +145,19 @@ while True:
             # Resize face for consistent recognition
             face_crop_resized = cv2.resize(face_crop, FACE_TARGET_SIZE)
 
-            try:
-                # Perform facial recognition using DeepFace
-                matches = DeepFace.find(img_path=face_crop_resized, db_path=DATABASE_PATH, model_name=FACE_RECOG_MODEL, enforce_detection=False, silent=True)
+            roll, name = recognize_face(face_crop_resized, DATABASE_PATH, FACE_RECOG_MODEL)
+            
+            if roll != "UNK":
+                label = f"{roll} - {name}"
 
-                if len(matches[0]) > 0:
-                    identity_path = matches[0].iloc[0]['identity']
-                    identity_filename = os.path.basename(identity_path)
-                    roll, name = parse_filename(identity_filename)
-
-                    label = f"{roll} - {name}"
-
-                    # Mark attendance only once per student
-                    if roll not in marked_students:
-                        timestamp = datetime.now().strftime("%H:%M:%S")
-                        attendance_records.append({"Roll": roll, "Name": name, "Time": timestamp})
-                        marked_students.add(roll)
-                        print(f"[✓] Marked: {label} at {timestamp}")
-                else:
-                    label = "Unknown"
-            except Exception as e:
+                # Mark attendance only once per student
+                if roll not in marked_students:
+                    timestamp = datetime.now().strftime("%H:%M:%S")
+                    attendance_records.append({"Roll": roll, "Name": name, "Time": timestamp})
+                    marked_students.add(roll)
+                    print(f"[✓] Marked: {label} at {timestamp}")
+            else:
                 label = "Unknown"
-                print("Error:", e)
 
             # Draw label and rectangle
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
