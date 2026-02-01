@@ -63,6 +63,7 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
 
 # Load known student images and data
 student_data = load_student_db(DATABASE_PATH)
+print(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
 
 
 # Initialize attendance tracking
