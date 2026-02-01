@@ -16,6 +16,13 @@ DATABASE_PATH = "students_db"
 LOGS_DIRECTORY = "attendance_logs"
 os.makedirs(LOGS_DIRECTORY, exist_ok=True)
 
+# Configuration
+FACE_RECOG_MODEL = "Facenet"
+MIN_DETECTION_CONFIDENCE = 0.5
+MODEL_SELECTION = 0
+FACE_TARGET_SIZE = (160, 160)
+
+
 # Load known student images and data
 student_data = []
 for filename in os.listdir(DATABASE_PATH):
@@ -40,7 +47,7 @@ marked_students = set()
 # Mediapipe face detection
 mp_face = mp.solutions.face_detection
 mp_draw = mp.solutions.drawing_utils
-face_detector = mp_face.FaceDetection(model_selection=0, min_detection_confidence=0.5)
+face_detector = mp_face.FaceDetection(model_selection=MODEL_SELECTION, min_detection_confidence=MIN_DETECTION_CONFIDENCE)
 
 cap = cv2.VideoCapture(0)
 print("Press 'q' to quit")
@@ -65,11 +72,11 @@ while True:
             face_crop = frame[max(0, y1):min(y2, h), max(0, x1):min(x2, w)]
 
             # Resize face for consistent recognition
-            face_crop_resized = cv2.resize(face_crop, (160, 160))
+            face_crop_resized = cv2.resize(face_crop, FACE_TARGET_SIZE)
 
             try:
                 # Perform facial recognition using DeepFace
-                matches = DeepFace.find(img_path=face_crop_resized, db_path=DATABASE_PATH, model_name="Facenet", enforce_detection=False, silent=True)
+                matches = DeepFace.find(img_path=face_crop_resized, db_path=DATABASE_PATH, model_name=FACE_RECOG_MODEL, enforce_detection=False, silent=True)
 
                 if len(matches[0]) > 0:
                     identity_path = matches[0].iloc[0]['identity']
