@@ -3,3 +3,4 @@ __pycache__/
 students_db/
 attendance_logs/
 .DS_Store
+*.xlsx
