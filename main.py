@@ -79,7 +79,11 @@ mp_draw = mp.solutions.drawing_utils
 face_detector = mp_face.FaceDetection(model_selection=MODEL_SELECTION, min_detection_confidence=MIN_DETECTION_CONFIDENCE)
 
 cap = cv2.VideoCapture(0)
-print("Press 'q' to quit")
+if not cap.isOpened():
+    print("Error: Could not open webcam.")
+    exit(1)
+
+print("Starting Attendance System. Press 'q' to quit...")
 
 while True:
     ret, frame = cap.read()
