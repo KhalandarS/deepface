@@ -35,10 +35,10 @@ LOGS_DIRECTORY = "attendance_logs"
 os.makedirs(LOGS_DIRECTORY, exist_ok=True)
 
 # Configuration
-FACE_RECOG_MODEL = "Facenet"
-MIN_DETECTION_CONFIDENCE = args.min_confidence
-MODEL_SELECTION = args.model_selection
-FACE_TARGET_SIZE = (160, 160)
+FACE_RECOG_MODEL: str = "Facenet"
+MIN_DETECTION_CONFIDENCE: float = args.min_confidence
+MODEL_SELECTION: int = args.model_selection
+FACE_TARGET_SIZE: tuple[int, int] = (160, 160)
 
 
 
