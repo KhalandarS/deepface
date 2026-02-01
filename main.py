@@ -66,6 +66,34 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
                 print(f"Skipping file {filename}: {e}")
     return data
 
+def extract_faces(frame: np.ndarray, detections: Any) -> List[tuple[np.ndarray, tuple[int, int, int, int]]]:
+    """Extract face crops and coordinates from MediaPipe detections."""
+    extracted = []
+    if not detections:
+        return extracted
+        
+    h, w, _ = frame.shape
+    for detection in detections:
+        bboxC = detection.location_data.relative_bounding_box
+        x1 = int(bboxC.xmin * w)
+        y1 = int(bboxC.ymin * h)
+        x2 = int(x1 + bboxC.width * w)
+        y2 = int(y1 + bboxC.height * h)
+        
+        # Ensure coordinates are within bounds
+        x1, y1 = max(0, x1), max(0, y1)
+        x2, y2 = min(w, x2), min(h, y2)
+        
+        if x1 >= x2 or y1 >= y2:
+            continue
+            
+        face_crop = frame[y1:y2, x1:x2]
+        if face_crop.size == 0:
+             continue
+             
+        extracted.append((face_crop, (x1, y1, x2, y2)))
+    return extracted
+
 # Load known student images and data
 student_data = load_student_db(DATABASE_PATH)
 print(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
@@ -100,15 +128,7 @@ while True:
     results = face_detector.process(rgb_frame)
 
     if results.detections:
-        for detection in results.detections:
-            bboxC = detection.location_data.relative_bounding_box
-            h, w, _ = frame.shape
-            x1 = int(bboxC.xmin * w)
-            y1 = int(bboxC.ymin * h)
-            x2 = int(x1 + bboxC.width * w)
-            y2 = int(y1 + bboxC.height * h)
-
-            face_crop = frame[max(0, y1):min(y2, h), max(0, x1):min(x2, w)]
+        for face_crop, (x1, y1, x2, y2) in extract_faces(frame, results.detections):
 
             # Resize face for consistent recognition
             face_crop_resized = cv2.resize(face_crop, FACE_TARGET_SIZE)
