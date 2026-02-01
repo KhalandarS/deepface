@@ -12,3 +12,7 @@ This project uses deepface for facial recognition tasks.
    ```bash
    python main.py
    ```
+
+## Utilities
+- `check_camera.py`: Simple script to verify webcam functionality.
+
