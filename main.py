@@ -1,11 +1,15 @@
-import cv2
+"""
+Main script for Face Recognition Attendance System using DeepFace.
+"""
 import os
-from deepface import DeepFace
 from datetime import datetime
-import pandas as pd
+
+import cv2
 import mediapipe as mp
-from PIL import Image
 import numpy as np
+import pandas as pd
+from deepface import DeepFace
+from PIL import Image
 
 # Directories and paths
 DB_PATH = "students_db"
