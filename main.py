@@ -7,6 +7,7 @@ Expected Database Structure:
 """
 import argparse
 import os
+import sys
 from datetime import datetime
 from typing import List, Dict, Any
 
@@ -86,7 +87,7 @@ face_detector = mp_face.FaceDetection(model_selection=MODEL_SELECTION, min_detec
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Error: Could not open webcam.")
-    exit(1)
+    sys.exit(1)
 
 print("Starting Attendance System. Press 'q' to quit...")
 
