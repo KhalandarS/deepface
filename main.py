@@ -1,6 +1,7 @@
 """
 Main script for Face Recognition Attendance System using DeepFace.
 """
+import argparse
 import os
 from datetime import datetime
 from typing import List, Dict, Any
@@ -12,8 +13,13 @@ import pandas as pd
 from deepface import DeepFace
 from PIL import Image
 
+# Parse command line arguments
+parser = argparse.ArgumentParser(description="DeepFace Attendance System")
+parser.add_argument("--db-path", type=str, default="students_db", help="Path to the database directory")
+args = parser.parse_args()
+
 # Directories and paths
-DATABASE_PATH = "students_db"
+DATABASE_PATH = args.db_path
 LOGS_DIRECTORY = "attendance_logs"
 os.makedirs(LOGS_DIRECTORY, exist_ok=True)
 
