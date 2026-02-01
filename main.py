@@ -25,6 +25,8 @@ from PIL import Image
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="DeepFace Attendance System")
 parser.add_argument("--db-path", type=str, default="students_db", help="Path to the database directory")
+parser.add_argument("--min-confidence", type=float, default=0.5, help="Minimum detection confidence")
+parser.add_argument("--model-selection", type=int, default=0, help="Model selection for MediaPipe (0 or 1)")
 args = parser.parse_args()
 
 # Directories and paths
@@ -34,8 +36,8 @@ os.makedirs(LOGS_DIRECTORY, exist_ok=True)
 
 # Configuration
 FACE_RECOG_MODEL = "Facenet"
-MIN_DETECTION_CONFIDENCE = 0.5
-MODEL_SELECTION = 0
+MIN_DETECTION_CONFIDENCE = args.min_confidence
+MODEL_SELECTION = args.model_selection
 FACE_TARGET_SIZE = (160, 160)
 
 
