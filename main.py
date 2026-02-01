@@ -6,10 +6,14 @@ Expected Database Structure:
 - Filenames should follow the format: `RollNumber_Name.jpg` (e.g., `101_JohnDoe.jpg`).
 """
 import argparse
+import logging
 import os
 import sys
 from datetime import datetime
 from typing import List, Dict, Any
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 import cv2
 import mediapipe as mp
@@ -50,7 +54,7 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
     """Load student images and data from the database directory."""
     data: List[Dict[str, Any]] = []
     if not os.path.exists(db_path):
-        print(f"Warning: Database path '{db_path}' does not exist.")
+        logging.warning(f"Database path '{db_path}' does not exist.")
         return data
 
     for filename in os.listdir(db_path):
@@ -63,7 +67,7 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
                 img.verify()  # Ensure image isn't corrupted
                 data.append({"roll": roll, "name": name, "path": path})
             except Exception as e:
-                print(f"Skipping file {filename}: {e}")
+                logging.warning(f"Skipping file {filename}: {e}")
     return data
 
 def extract_faces(frame: np.ndarray, detections: Any) -> List[tuple[np.ndarray, tuple[int, int, int, int]]]:
@@ -103,12 +107,12 @@ def recognize_face(face_img: np.ndarray, db_path: str, model_name: str) -> tuple
              identity_filename = os.path.basename(identity_path)
              return parse_filename(identity_filename)
     except Exception as e:
-         print(f"Recognition error: {e}")
+         logging.error(f"Recognition error: {e}")
     return "UNK", "Unknown"
 
 # Load known student images and data
 student_data = load_student_db(DATABASE_PATH)
-print(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
+logging.info(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
 
 
 # Initialize attendance tracking
@@ -126,10 +130,10 @@ face_detector = mp_face.FaceDetection(model_selection=MODEL_SELECTION, min_detec
 
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
-    print("Error: Could not open webcam.")
+    logging.error("Could not open webcam.")
     sys.exit(1)
 
-print("Starting Attendance System. Press 'q' to quit...")
+logging.info("Starting Attendance System. Press 'q' to quit...")
 
 while True:
     ret, frame = cap.read()
@@ -155,7 +159,7 @@ while True:
                     timestamp = datetime.now().strftime("%H:%M:%S")
                     attendance_records.append({"Roll": roll, "Name": name, "Time": timestamp})
                     marked_students.add(roll)
-                    print(f"[✓] Marked: {label} at {timestamp}")
+                    logging.info(f"Marked: {label} at {timestamp}")
             else:
                 label = "Unknown"
 
@@ -175,13 +179,13 @@ if attendance_records:
     df = pd.DataFrame(attendance_records)
     try:
         df.to_excel(excel_path, index=False)
-        print(f"\n✅ Attendance saved to {excel_path}")
+        logging.info(f"Attendance saved to {excel_path}")
     except PermissionError:
-        print(f"\n❌ Error: Could not save to {excel_path}. Is the file open?")
+        logging.error(f"Could not save to {excel_path}. Is the file open?")
     except Exception as e:
-        print(f"\n❌ Failed to save attendance: {e}")
+        logging.error(f"Failed to save attendance: {e}")
 else:
-    print("\n⚠️ No attendance recorded today.")
+    logging.warning("No attendance recorded today.")
 
 cap.release()
 cv2.destroyAllWindows()
