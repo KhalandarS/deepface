@@ -73,42 +73,7 @@ def load_student_db(db_path: str) -> List[Dict[str, Any]]:
                 logging.warning(f"Skipping file {filename}: {e}")
     return data
 
-def extract_faces(frame: np.ndarray, detections: Any) -> List[tuple[np.ndarray, tuple[int, int, int, int]]]:
-    """
-    Extract face crops and coordinates from MediaPipe detections.
 
-    Args:
-        frame: The original image frame.
-        detections: The MediaPipe detection results.
-
-    Returns:
-        List[tuple]: A list of tuples, each containing the face crop and its coordinates (x1, y1, x2, y2).
-    """
-    extracted = []
-    if not detections:
-        return extracted
-        
-    h, w, _ = frame.shape
-    for detection in detections:
-        bboxC = detection.location_data.relative_bounding_box
-        x1 = int(bboxC.xmin * w)
-        y1 = int(bboxC.ymin * h)
-        x2 = int(x1 + bboxC.width * w)
-        y2 = int(y1 + bboxC.height * h)
-        
-        # Ensure coordinates are within bounds
-        x1, y1 = max(0, x1), max(0, y1)
-        x2, y2 = min(w, x2), min(h, y2)
-        
-        if x1 >= x2 or y1 >= y2:
-            continue
-            
-        face_crop = frame[y1:y2, x1:x2]
-        if face_crop.size == 0:
-             continue
-             
-        extracted.append((face_crop, (x1, y1, x2, y2)))
-    return extracted
 
 def recognize_face(face_img: np.ndarray, db_path: str, model_name: str) -> tuple[str, str]:
     """
@@ -152,10 +117,9 @@ def cleanup():
 atexit.register(cleanup)
 
 
-# Mediapipe face detection
-mp_face = mp.solutions.face_detection
-mp_draw = mp.solutions.drawing_utils
-face_detector = mp_face.FaceDetection(model_selection=MODEL_SELECTION, min_detection_confidence=MIN_DETECTION_CONFIDENCE)
+# Face detection
+from detector import FaceDetector
+face_detector = FaceDetector(model_selection=MODEL_SELECTION, min_detection_confidence=MIN_DETECTION_CONFIDENCE)
 
 from video_stream import VideoStream
 try:
@@ -170,11 +134,10 @@ while True:
     if not ret:
         break
 
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = face_detector.process(rgb_frame)
+    results = face_detector.process_frame(frame)
 
     if results.detections:
-        for face_crop, (x1, y1, x2, y2) in extract_faces(frame, results.detections):
+        for face_crop, (x1, y1, x2, y2) in FaceDetector.extract_faces(frame, results.detections):
 
             # Resize face for consistent recognition
             face_crop_resized = cv2.resize(face_crop, FACE_TARGET_SIZE)
