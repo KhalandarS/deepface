@@ -78,9 +78,16 @@ try:
 except ValueError:
     sys.exit(1)
 
+
+# FPS calculation
+import time
+prev_frame_time = 0
+new_frame_time = 0
+
 logging.info("Starting Attendance System. Press 'q' to quit...")
 
 while True:
+
     ret, frame = video_stream.read()
     if not ret:
         break
@@ -109,6 +116,15 @@ while True:
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, label, (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+
+    # Calculate FPS
+    new_frame_time = time.time()
+    fps = 1 / (new_frame_time - prev_frame_time) if prev_frame_time > 0 else 0
+    prev_frame_time = new_frame_time
+    fps_str = str(int(fps))
+
+    # Display FPS
+    cv2.putText(frame, f"FPS: {fps_str}", (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 255, 0), 2, cv2.LINE_AA)
 
     # Display the live feed
     cv2.imshow("Smart Attendance", frame)
