@@ -41,65 +41,16 @@ MIN_DETECTION_CONFIDENCE: float = args.min_confidence
 MODEL_SELECTION: int = args.model_selection
 FACE_TARGET_SIZE: tuple[int, int] = (160, 160)
 
-
-
-def parse_filename(filename: str) -> tuple[str, str]:
-    """Parse filename to extract roll number and name."""
-    try:
-        base = filename.rsplit(".", 1)[0]
-        if "_" in base:
-            return base.split("_", 1)
-        return "UNK", base
-    except Exception:
-        return "UNK", "Unknown"
-
-def load_student_db(db_path: str) -> List[Dict[str, Any]]:
-    """Load student images and data from the database directory."""
-    data: List[Dict[str, Any]] = []
-    if not os.path.exists(db_path):
-        logging.warning(f"Database path '{db_path}' does not exist.")
-        return data
-
-    for filename in os.listdir(db_path):
-        if filename.lower().endswith((".jpg", ".jpeg", ".png")):
-            try:
-                path = os.path.join(db_path, filename)
-                roll, name = parse_filename(filename)
-                
-                img = Image.open(path)
-                img.verify()  # Ensure image isn't corrupted
-                data.append({"roll": roll, "name": name, "path": path})
-            except Exception as e:
-                logging.warning(f"Skipping file {filename}: {e}")
-    return data
+from recognizer import FaceRecognizer
+face_recognizer = FaceRecognizer(db_path=DATABASE_PATH, model_name=FACE_RECOG_MODEL)
 
 
 
-def recognize_face(face_img: np.ndarray, db_path: str, model_name: str) -> tuple[str, str]:
-    """
-    Recognize a face against the database using DeepFace.
 
-    Args:
-        face_img: The face image crop.
-        db_path: Path to the student database.
-        model_name: The DeepFace model to use.
 
-    Returns:
-        tuple[str, str]: A tuple containing (RollNumber, Name). Returns ("UNK", "Unknown") if not recognized.
-    """
-    try:
-         matches = DeepFace.find(img_path=face_img, db_path=db_path, model_name=model_name, enforce_detection=False, silent=True)
-         if len(matches[0]) > 0:
-             identity_path = matches[0].iloc[0]['identity']
-             identity_filename = os.path.basename(identity_path)
-             return parse_filename(identity_filename)
-    except Exception as e:
-         logging.error(f"Recognition error: {e}")
-    return "UNK", "Unknown"
 
-# Load known student images and data
-student_data = load_student_db(DATABASE_PATH)
-logging.info(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
+
+
 
 
 # Initialize attendance manager
@@ -142,7 +93,7 @@ while True:
             # Resize face for consistent recognition
             face_crop_resized = cv2.resize(face_crop, FACE_TARGET_SIZE)
 
-            roll, name = recognize_face(face_crop_resized, DATABASE_PATH, FACE_RECOG_MODEL)
+            roll, name = face_recognizer.recognize(face_crop_resized)
             
             if roll != "UNK":
                 label = f"{roll} - {name}"
