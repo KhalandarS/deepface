@@ -143,8 +143,8 @@ attendance_manager = AttendanceManager(log_dir=LOGS_DIRECTORY)
 
 def cleanup():
     """Release resources on exit."""
-    if 'cap' in globals() and cap is not None and cap.isOpened():
-        cap.release()
+    if 'video_stream' in globals() and video_stream is not None:
+        video_stream.release()
     cv2.destroyAllWindows()
     attendance_manager.save_records()
     logging.info("Resources released.")
@@ -157,15 +157,16 @@ mp_face = mp.solutions.face_detection
 mp_draw = mp.solutions.drawing_utils
 face_detector = mp_face.FaceDetection(model_selection=MODEL_SELECTION, min_detection_confidence=MIN_DETECTION_CONFIDENCE)
 
-cap = cv2.VideoCapture(0)
-if not cap.isOpened():
-    logging.error("Could not open webcam.")
+from video_stream import VideoStream
+try:
+    video_stream = VideoStream(0)
+except ValueError:
     sys.exit(1)
 
 logging.info("Starting Attendance System. Press 'q' to quit...")
 
 while True:
-    ret, frame = cap.read()
+    ret, frame = video_stream.read()
     if not ret:
         break
 
