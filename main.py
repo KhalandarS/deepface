@@ -137,22 +137,20 @@ student_data = load_student_db(DATABASE_PATH)
 logging.info(f"Loaded {len(student_data)} students from {DATABASE_PATH}")
 
 
-# Initialize attendance tracking
-today_str = datetime.now().strftime("%Y-%m-%d")
-excel_path = os.path.join(LOGS_DIRECTORY, f"attendance_{today_str}.xlsx")
-attendance_records = []
+# Initialize attendance manager
+from attendance_manager import AttendanceManager
+attendance_manager = AttendanceManager(log_dir=LOGS_DIRECTORY)
 
 def cleanup():
     """Release resources on exit."""
     if 'cap' in globals() and cap is not None and cap.isOpened():
         cap.release()
     cv2.destroyAllWindows()
+    attendance_manager.save_records()
     logging.info("Resources released.")
 
 atexit.register(cleanup)
 
-# Set to prevent multiple entries per student
-marked_students = set()
 
 # Mediapipe face detection
 mp_face = mp.solutions.face_detection
@@ -186,12 +184,8 @@ while True:
                 label = f"{roll} - {name}"
                 color = (0, 255, 0)  # Green for known
 
-                # Mark attendance only once per student
-                if roll not in marked_students:
-                    timestamp = datetime.now().strftime("%H:%M:%S")
-                    attendance_records.append({"Roll": roll, "Name": name, "Time": timestamp})
-                    marked_students.add(roll)
-                    logging.info(f"Marked: {label} at {timestamp}")
+                # Mark attendance using manager
+                attendance_manager.mark_attendance(roll, name)
             else:
                 label = "Unknown"
                 color = (0, 0, 255)  # Red for unknown
@@ -206,18 +200,5 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
-# Save Excel file at the end
-if attendance_records:
-    df = pd.DataFrame(attendance_records)
-    try:
-        df.to_excel(excel_path, index=False)
-        logging.info(f"Attendance saved to {excel_path}")
-    except PermissionError:
-        logging.error(f"Could not save to {excel_path}. Is the file open?")
-    except Exception as e:
-        logging.error(f"Failed to save attendance: {e}")
-else:
-    logging.warning("No attendance recorded today.")
 
 
