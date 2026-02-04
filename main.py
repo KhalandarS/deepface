@@ -23,26 +23,23 @@ import pandas as pd
 from deepface import DeepFace
 from PIL import Image
 
-# Parse command line arguments
+# Configuration
+from config import Config
+
+# Parse command line arguments (Override config if provided)
 parser = argparse.ArgumentParser(description="DeepFace Attendance System")
-parser.add_argument("--db-path", type=str, default="students_db", help="Path to the database directory")
-parser.add_argument("--min-confidence", type=float, default=0.5, help="Minimum detection confidence")
-parser.add_argument("--model-selection", type=int, default=0, help="Model selection for MediaPipe (0 or 1)")
+parser.add_argument("--db-path", type=str, default=Config.DATABASE_PATH, help="Path to the database directory")
+parser.add_argument("--min-confidence", type=float, default=Config.MIN_DETECTION_CONFIDENCE, help="Minimum detection confidence")
+parser.add_argument("--model-selection", type=int, default=Config.MODEL_SELECTION, help="Model selection for MediaPipe (0 or 1)")
 args = parser.parse_args()
 
-# Directories and paths
-DATABASE_PATH = args.db_path
-LOGS_DIRECTORY = "attendance_logs"
-os.makedirs(LOGS_DIRECTORY, exist_ok=True)
-
-# Configuration
-FACE_RECOG_MODEL: str = "Facenet"
-MIN_DETECTION_CONFIDENCE: float = args.min_confidence
-MODEL_SELECTION: int = args.model_selection
-FACE_TARGET_SIZE: tuple[int, int] = (160, 160)
+# Update Config with args
+Config.DATABASE_PATH = args.db_path
+Config.MIN_DETECTION_CONFIDENCE = args.min_confidence
+Config.MODEL_SELECTION = args.model_selection
 
 from recognizer import FaceRecognizer
-face_recognizer = FaceRecognizer(db_path=DATABASE_PATH, model_name=FACE_RECOG_MODEL)
+face_recognizer = FaceRecognizer(db_path=Config.DATABASE_PATH, model_name=Config.FACE_RECOG_MODEL)
 
 
 
@@ -55,7 +52,7 @@ face_recognizer = FaceRecognizer(db_path=DATABASE_PATH, model_name=FACE_RECOG_MO
 
 # Initialize attendance manager
 from attendance_manager import AttendanceManager
-attendance_manager = AttendanceManager(log_dir=LOGS_DIRECTORY)
+attendance_manager = AttendanceManager(log_dir=Config.LOGS_DIRECTORY)
 
 def cleanup():
     """Release resources on exit."""
@@ -70,7 +67,7 @@ atexit.register(cleanup)
 
 # Face detection
 from detector import FaceDetector
-face_detector = FaceDetector(model_selection=MODEL_SELECTION, min_detection_confidence=MIN_DETECTION_CONFIDENCE)
+face_detector = FaceDetector(model_selection=Config.MODEL_SELECTION, min_detection_confidence=Config.MIN_DETECTION_CONFIDENCE)
 
 from video_stream import VideoStream
 try:
@@ -98,7 +95,7 @@ while True:
         for face_crop, (x1, y1, x2, y2) in FaceDetector.extract_faces(frame, results.detections):
 
             # Resize face for consistent recognition
-            face_crop_resized = cv2.resize(face_crop, FACE_TARGET_SIZE)
+            face_crop_resized = cv2.resize(face_crop, Config.FACE_TARGET_SIZE)
 
             roll, name = face_recognizer.recognize(face_crop_resized)
             
