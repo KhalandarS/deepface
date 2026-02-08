@@ -1,6 +1,12 @@
 import cv2
 
-def check_camera(source=0):
+def check_camera(source: int = 0) -> None:
+    """
+    Checks if the camera source is available and displays the feed.
+    
+    Args:
+        source (int): The camera index to check. Defaults to 0.
+    """
     cap = cv2.VideoCapture(source)
     if not cap.isOpened():
         print(f"Cannot open camera {source}")
