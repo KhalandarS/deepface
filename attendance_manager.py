@@ -6,9 +6,16 @@ from typing import List, Dict, Set
 
 class AttendanceManager:
     """
-    Manages attendance records, ensuring uniqueness and saving to file.
+    Manages attendance records, ensures uniqueness of entries per session, 
+    and handles saving records to an Excel file.
     """
-    def __init__(self, log_dir: str = "attendance_logs"):
+    def __init__(self, log_dir: str = "attendance_logs") -> None:
+        """
+        Initialize the AttendanceManager.
+        
+        Args:
+            log_dir (str): Directory where attendance logs will be saved. Defaults to "attendance_logs".
+        """
         self.log_dir = log_dir
         os.makedirs(self.log_dir, exist_ok=True)
         self.marked_students: Set[str] = set()
