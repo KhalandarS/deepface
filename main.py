@@ -10,11 +10,9 @@ import logging
 import os
 import sys
 import atexit
+import time
 from datetime import datetime
 from typing import List, Dict, Any
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 import cv2
 import mediapipe as mp
@@ -23,8 +21,15 @@ import pandas as pd
 from deepface import DeepFace
 from PIL import Image
 
-# Configuration
+# Local imports
 from config import Config
+from recognizer import FaceRecognizer
+from attendance_manager import AttendanceManager
+from detector import FaceDetector
+from video_stream import VideoStream
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Parse command line arguments (Override config if provided)
 parser = argparse.ArgumentParser(description="DeepFace Attendance System")
@@ -38,21 +43,15 @@ Config.DATABASE_PATH = args.db_path
 Config.MIN_DETECTION_CONFIDENCE = args.min_confidence
 Config.MODEL_SELECTION = args.model_selection
 
-from recognizer import FaceRecognizer
+# Initialize components
 face_recognizer = FaceRecognizer(db_path=Config.DATABASE_PATH, model_name=Config.FACE_RECOG_MODEL)
-
-
-
-
-
-
-
-
-
-
-# Initialize attendance manager
-from attendance_manager import AttendanceManager
 attendance_manager = AttendanceManager(log_dir=Config.LOGS_DIRECTORY)
+face_detector = FaceDetector(model_selection=Config.MODEL_SELECTION, min_detection_confidence=Config.MIN_DETECTION_CONFIDENCE)
+
+try:
+    video_stream = VideoStream(0)
+except ValueError:
+    sys.exit(1)
 
 def cleanup():
     """Release resources on exit."""
@@ -64,20 +63,7 @@ def cleanup():
 
 atexit.register(cleanup)
 
-
-# Face detection
-from detector import FaceDetector
-face_detector = FaceDetector(model_selection=Config.MODEL_SELECTION, min_detection_confidence=Config.MIN_DETECTION_CONFIDENCE)
-
-from video_stream import VideoStream
-try:
-    video_stream = VideoStream(0)
-except ValueError:
-    sys.exit(1)
-
-
 # FPS calculation
-import time
 prev_frame_time = 0
 new_frame_time = 0
 
