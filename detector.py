@@ -7,7 +7,14 @@ class FaceDetector:
     """
     Wrapper for MediaPipe Face Detection.
     """
-    def __init__(self, model_selection: int = 0, min_detection_confidence: float = 0.5):
+    def __init__(self, model_selection: int = 0, min_detection_confidence: float = 0.5) -> None:
+        """
+        Initialize the FaceDetector.
+        
+        Args:
+            model_selection (int): 0 for short-range (within 2 meters), 1 for long-range (within 5 meters).
+            min_detection_confidence (float): Minimum confidence value ([0.0, 1.0]) for face detection.
+        """
         self.mp_face = mp.solutions.face_detection
         self.face_detector = self.mp_face.FaceDetection(
             model_selection=model_selection, 
@@ -16,7 +23,13 @@ class FaceDetector:
     
     def process_frame(self, frame: np.ndarray) -> Any:
         """
-        Process the frame and return detection results.
+        Process the frame to detect faces.
+        
+        Args:
+            frame (np.ndarray): The input image frame.
+            
+        Returns:
+            Any: The detection results from MediaPipe.
         """
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         return self.face_detector.process(rgb_frame)
@@ -25,6 +38,13 @@ class FaceDetector:
     def extract_faces(frame: np.ndarray, detections: Any) -> List[Tuple[np.ndarray, Tuple[int, int, int, int]]]:
         """
         Extract face crops and coordinates from MediaPipe detections.
+        
+        Args:
+            frame (np.ndarray): The input image frame.
+            detections (Any): THe detection results.
+            
+        Returns:
+            List[Tuple[np.ndarray, Tuple[int, int, int, int]]]: A list of tuples containing the face crop and its bounding box (x1, y1, x2, y2).
         """
         extracted = []
         if not detections:
