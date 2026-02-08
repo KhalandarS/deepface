@@ -8,14 +8,26 @@ class FaceRecognizer:
     """
     Wrapper for DeepFace Recognition.
     """
-    def __init__(self, db_path: str, model_name: str = "Facenet"):
+    def __init__(self, db_path: str, model_name: str = "Facenet") -> None:
+        """
+        Initialize the FaceRecognizer.
+        
+        Args:
+            db_path (str): Path to the database of known faces.
+            model_name (str): The name of the model to use for recognition.
+        """
         self.db_path = db_path
         self.model_name = model_name
         
     def recognize(self, face_img: np.ndarray) -> tuple[str, str]:
         """
         Recognize a face against the database.
-        Returns: (RollNumber, Name) or ("UNK", "Unknown")
+        
+        Args:
+            face_img (np.ndarray): The face image to recognize.
+            
+        Returns:
+            tuple[str, str]: A tuple containing (RollNumber, Name) or ("UNK", "Unknown").
         """
         try:
              matches = DeepFace.find(
@@ -37,7 +49,16 @@ class FaceRecognizer:
 
     @staticmethod
     def _parse_filename(filename: str) -> tuple[str, str]:
-        """Parse filename to extract roll number and name."""
+        """
+        Parse filename to extract roll number and name.
+        Expected format: RollNumber_Name.ext
+        
+        Args:
+            filename (str): The filename to parse.
+            
+        Returns:
+            tuple[str, str]: (RollNumber, Name) or ("UNK", filename_base)
+        """
         try:
             base = filename.rsplit(".", 1)[0]
             if "_" in base:
