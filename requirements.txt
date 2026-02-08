@@ -1,7 +1,7 @@
 deepface
+mediapipe
+numpy
 opencv-python
 pandas
-mediapipe
 pillow
-numpy
 python-dotenv
