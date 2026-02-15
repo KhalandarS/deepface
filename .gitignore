@@ -1,6 +1,24 @@
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Database and logs
 students_db/
 attendance_logs/
-.DS_Store
 *.xlsx
+*.xls
+
+# Environment
+.env
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
