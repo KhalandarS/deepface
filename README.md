@@ -1,5 +1,9 @@
 # Face Recognition Attendance System
 
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+
 This project implements a smart attendance system using DeepFace for facial recognition and MediaPipe for face detection.
 
 ## Features
